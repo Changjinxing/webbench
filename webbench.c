@@ -17,7 +17,7 @@
  */ 
 #include "socket.c"
 #include <unistd.h>
-#include <sys/param.h>
+#include <sys/param.h> //MAXHOSTNAMELEN == 64
 #include <rpc/types.h>
 #include <getopt.h>
 #include <strings.h>
@@ -46,9 +46,19 @@ char *proxyhost=NULL;
 int benchtime=30;
 /* internal */
 int mypipe[2];
-char host[MAXHOSTNAMELEN];
+char host[MAXHOSTNAMELEN];//char host[64]
 #define REQUEST_SIZE 2048
 char request[REQUEST_SIZE];
+
+/* struct option
+struct option
+{
+    const char *name;
+    int has_arg;
+    int *flag;
+    int val;
+};
+*/
 
 static const struct option long_options[]=
 {
