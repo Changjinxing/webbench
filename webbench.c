@@ -60,6 +60,9 @@ struct option
 };
 */
 
+//struct option结构体，配合getopt_long函数使用
+//static const <type> arr[] = {};
+//static const int arr[] = {1, 2};
 static const struct option long_options[]=
 {
  {"force",no_argument,&force,1},
