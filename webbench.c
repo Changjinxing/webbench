@@ -165,6 +165,7 @@ int main(int argc, char *argv[])
 		}
 	}
  
+	//optind为对应参数的下标位置
 	if(optind==argc) {
 		fprintf(stderr,"webbench: Missing URL!\n");
 		usage();
@@ -173,10 +174,10 @@ int main(int argc, char *argv[])
 
 	if(clients==0) clients=1;
 	if(benchtime==0) benchtime=60;
-	/* Copyright */
+	/* Copyright 
 	fprintf(stderr,"Webbench - Simple Web Benchmark "PROGRAM_VERSION"\n"
 			"Copyright (c) Radim Kolar 1997-2004, GPL Open Source Software.\n"
-			);
+			);*/
 	build_request(argv[optind]);
 	/* print bench info */
 	printf("\nBenchmarking: ");
@@ -232,9 +233,13 @@ void build_request(const char *url)
 		case METHOD_OPTIONS: strcpy(request,"OPTIONS");break;
 		case METHOD_TRACE: strcpy(request,"TRACE");break;
 	}
-          
-	strcat(request," ");
 
+	/*extern char *strcat(char *dest,char *src);*/
+	/*src追加到dest末尾，把src所指字符串添加到dest结尾处(覆盖dest结尾处的'\0')并添加'\0'*/
+	strcat(request," "); 
+
+	/*strstr(char *haystack, char *needle);*/
+	/*从字符串haystack中寻找needle第一次出现的位置（不比较结束符NULL) 返回指向第一次出现needle位置的指针，如果没找到则返回NULL*/
 	if(NULL==strstr(url,"://"))
 	{
 		fprintf(stderr, "\n%s: is not a valid URL.\n",url);
@@ -246,55 +251,64 @@ void build_request(const char *url)
 		exit(2);
 	}
 	if(proxyhost==NULL)
-	if (0!=strncasecmp("http://",url,7)) 
 	{
-		fprintf(stderr,"\nOnly HTTP protocol is directly supported, set --proxy for others.\n");
-		exit(2);
+		if (0!=strncasecmp("http://",url,7)) 
+		{
+			fprintf(stderr,"\nOnly HTTP protocol is directly supported, set --proxy for others.\n");
+			exit(2);
+		}
 	}
 	/* protocol/host delimiter */
 	i=strstr(url,"://")-url+3;
 	/* printf("%d\n",i); */
 
+	/*extern char *strchr(char *s,char c);*/
+	/*查找字符串s中首次出现字符c的位置*/
 	if(strchr(url+i,'/')==NULL) {
 		fprintf(stderr,"\nInvalid URL syntax - hostname don't ends with '/'.\n");
 		exit(2);
 	}
+	
 	if(proxyhost==NULL)
 	{
-	/* get port from hostname */
-	if(index(url+i,':')!=NULL &&
-		index(url+i,':')<index(url+i,'/'))
-    {
-		strncpy(host,url+i,strchr(url+i,':')-url-i);
-		bzero(tmp,10);
-		strncpy(tmp,index(url+i,':')+1,strchr(url+i,'/')-index(url+i,':')-1);
-		/* printf("tmp=%s\n",tmp); */
-		proxyport=atoi(tmp);
-		if(proxyport==0) proxyport=80;
-    } else
-    {
-		strncpy(host,url+i,strcspn(url+i,"/"));
-    }
-    // printf("Host=%s\n",host);
-    strcat(request+strlen(request),url+i+strcspn(url+i,"/"));
+		/* get port from hostname */
+		if(index(url+i,':')!=NULL &&
+			index(url+i,':')<index(url+i,'/'))
+		{
+			strncpy(host,url+i,strchr(url+i,':')-url-i);
+			bzero(tmp,10);
+			strncpy(tmp,index(url+i,':')+1,strchr(url+i,'/')-index(url+i,':')-1);
+			/* printf("tmp=%s\n",tmp); */
+			proxyport=atoi(tmp);
+			if(proxyport==0) proxyport=80;
+		} else
+		{
+			strncpy(host,url+i,strcspn(url+i,"/"));
+		}
+		// printf("Host=%s\n",host);
+		strcat(request+strlen(request),url+i+strcspn(url+i,"/"));
 	} else
 	{
 		// printf("ProxyHost=%s\nProxyPort=%d\n",proxyhost,proxyport);
 		strcat(request,url);
 	}
+	
 	if(http10==1)
 		strcat(request," HTTP/1.0");
 	else if (http10==2)
 		strcat(request," HTTP/1.1");
 		strcat(request,"\r\n");
+		
 	if(http10>0)
 		strcat(request,"User-Agent: WebBench "PROGRAM_VERSION"\r\n");
+	
 	if(proxyhost==NULL && http10>0)
 	{
 		strcat(request,"Host: ");
 		strcat(request,host);
 		strcat(request,"\r\n");
 	}
+	
 	if(force_reload && proxyhost!=NULL)
 	{
 		strcat(request,"Pragma: no-cache\r\n");
